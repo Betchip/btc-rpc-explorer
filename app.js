@@ -255,6 +255,30 @@ function loadMiningPoolConfigs() {
 	}
 }
 
+function loadCoinSupplyConfigs() {
+	global.coinSupplyConfigs = [];
+
+	var coinSupplyConfigDir = path.join(__dirname, "public", "txt", "coin-supply-configs", global.coinConfig.ticker);
+
+	fs.readdir(coinSupplyConfigDir, function(err, files) {
+		if (err) {
+			return console.log(`Unable to scan directory: ${err}`);
+		}
+
+		files.forEach(function(file) {
+			var filepath = path.join(coinSupplyConfigDir, file);
+			var contents = fs.readFileSync(filepath, 'utf8');
+
+			var coinSupply = {
+				filepath: filepath,
+				payload: JSON.parse(contents)
+			};
+
+			global.coinSupplyConfigs.push(coinSupply);
+		});
+	});
+}
+
 function getSourcecodeProjectMetadata() {
 	var options = {
 		url: "https://api.github.com/repos/janoside/btc-rpc-explorer",
@@ -273,6 +297,26 @@ function getSourcecodeProjectMetadata() {
 			console.log(`Error 3208fh3ew7eghfg: ${error}, StatusCode: ${response.statusCode}, Response: ${JSON.stringify(response)}`);
 		}
 	});
+}
+
+
+function refreshTotalCoinSupply() {
+	if(global.coinSupplyConfigs && global.coinSupplyConfigs.length){
+		coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
+			if (getblockchaininfo.blocks) {
+				var coinSupplyConfig = global.coinSupplyConfigs[0];
+
+				while(coinSupplyConfig.payload.blockHeight < (getblockchaininfo.blocks + 1)){
+					coinSupplyConfig.payload.blockHeight++;
+					coinSupplyConfig.payload.totalSupply = coinSupplyConfig.payload.totalSupply + global.coinConfig.blockRewardFunction(coinSupplyConfig.payload.blockHeight);
+				}
+				
+				global.totalCoinSupply = coinSupplyConfig.payload.totalSupply;
+			}
+		}).catch(function(err) {
+			console.log(`Error logging block stats: ${err}`);
+		});
+	}
 }
 
 
@@ -362,6 +406,7 @@ app.runOnStartup = function() {
 	}
 
 	loadMiningPoolConfigs();
+	loadCoinSupplyConfigs();
 
 	if (global.sourcecodeVersion == null && fs.existsSync('.git')) {
 		simpleGit(".").log(["-n 1"], function(err, log) {
@@ -381,6 +426,12 @@ app.runOnStartup = function() {
 
 	if (global.exchangeRates == null) {
 		utils.refreshExchangeRates();
+	}
+
+	if(global.coinSupplyConfigs && global.coinSupplyConfigs.length){
+		refreshTotalCoinSupply();
+		// refresh total supply periodically
+		setInterval(refreshTotalCoinSupply, 300000);		
 	}
 
 	// refresh exchange rate periodically
