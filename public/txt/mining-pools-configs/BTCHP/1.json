@@ -1,0 +1,14 @@
+{
+    "coinbase_tags" : {
+        "/Betchip/": {
+            "name": "Betchip",
+            "link": "https://http://pool.betchip.io/"
+        }
+    },
+    "payout_addresses" : {
+        "BSi2iwZbgi9h3pqsth7qPUKTyM62Uwva7s" : {
+            "name" : "Betchip",
+            "link" : "https://http://pool.betchip.io/"
+        }
+    }
+}

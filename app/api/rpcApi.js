@@ -140,8 +140,6 @@ function getRpcMethodHelp(methodName) {
 	return getRpcDataWithParams({method:"help", parameters:[methodName]});
 }
 
-
-
 function getRpcData(cmd) {
 	return new Promise(function(resolve, reject) {
 		debug(`RPC: ${cmd}`);

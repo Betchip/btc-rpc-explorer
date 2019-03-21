@@ -34,7 +34,7 @@ The below instructions are geared toward BTC, but can be adapted easily to other
 
 1. Install and run a full, archiving node - [instructions](https://bitcoin.org/en/full-node). Ensure that your bitcoin node has full transaction indexing enabled (`txindex=1`) and the RPC server enabled (`server=1`).
 2. Synchronize your node with the Bitcoin network.
-3. "Recent" version of Node.js (8+ recommended).
+3. "Recent" version of Node.js (8+ recommended). [instructions](https://www.npmjs.com/package/windows-build-tools). If compiling on Windows, please follow instructions on link.
 
 ## Instructions
 
