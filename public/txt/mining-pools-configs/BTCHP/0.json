@@ -1,14 +1,22 @@
 {
-    "coinbase_tags" : {
-        "/Betchip/": {
+    "coinbase_tags": {
+        "Betchip": {
             "name": "Betchip",
-            "link": "https://http://pool.betchip.io/"
+            "link": "https://pool.betchip.io/"
+        },
+        "/Mining-Dutch/": {
+            "name": "Mining-Dutch",
+            "link": "https://www.mining-dutch.nl/"
         }
     },
-    "payout_addresses" : {
-        "BSi2iwZbgi9h3pqsth7qPUKTyM62Uwva7s" : {
-            "name" : "Betchip",
-            "link" : "https://http://pool.betchip.io/"
+    "payout_addresses": {
+        "BSi2iwZbgi9h3pqsth7qPUKTyM62Uwva7s": {
+            "name": "Betchip",
+            "link": "https://http://pool.betchip.io/"
+        },
+        "BRvXJgMLWZHPRqekj9WmoEoudQZTZV36Gx": {
+            "name": "Mining-Dutch",
+            "link": "https://www.mining-dutch.nl/"
         }
     }
 }

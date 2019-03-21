@@ -254,8 +254,8 @@ function getMinerFromCoinbaseTx(tx) {
 
 			for (var payoutAddress in miningPoolsConfig.payout_addresses) {
 				if (miningPoolsConfig.payout_addresses.hasOwnProperty(payoutAddress)) {
-					if (tx.vout && tx.vout.length > 0 && tx.vout[0].scriptPubKey && tx.vout[0].scriptPubKey.addresses && tx.vout[0].scriptPubKey.addresses.length > 0) {
-						if (tx.vout[0].scriptPubKey.addresses[0] == payoutAddress) {
+					if (tx.vout && tx.vout.length > 1 && tx.vout[1].scriptPubKey && tx.vout[1].scriptPubKey.addresses && tx.vout[1].scriptPubKey.addresses.length > 0) {
+						if (tx.vout[1].scriptPubKey.addresses[0] == payoutAddress) {
 							var minerInfo = miningPoolsConfig.payout_addresses[payoutAddress];
 							minerInfo.identifiedBy = "payout address " + payoutAddress;
 

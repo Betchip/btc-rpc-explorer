@@ -1099,4 +1099,9 @@ router.get("/fun", function(req, res, next) {
 	next();
 });
 
+router.get("/totalbc", function(req, res, next) {
+	// res.send(global.totalCoinSupply);
+	res.send(''+global.totalCoinSupply);
+});
+
 module.exports = router;

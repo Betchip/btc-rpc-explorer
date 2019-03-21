@@ -58,6 +58,9 @@ block content
 		if (global.exchangeRates)
 			- networkSummaryItemCount++;
 
+		if (global.totalCoinSupply)
+			- networkSummaryItemCount++;
+
 		if (txStats)
 			- networkSummaryItemCount++;
 
@@ -164,18 +167,13 @@ block content
 
 					if (global.totalCoinSupply)
 						div(class=networkSummaryColumnClass)
-							div(class="float-left", style="height: 40px; width: 40px; font-size: 12px;")
+							div(class="float-left", style="height: 40px; width: 40px;")
 								span
-									i(class="fas fa-money-bill-wave-alt fa-2x mr-2", style="margin-top: 7px;")
+									i(class="fas fa-coins fa-2x mr-2", style="margin-top: 6px; margin-left: 3px;")
 
-							span(class="font-weight-bold") Coin Supply 
-								span(data-toggle="tooltip", title=("Exchange-rate data from: " + global.totalCoinSupply))
-									i(class="fas fa-info-circle")
+							span(class="font-weight-bold") Coin Supply
 
-							if (global.exchangeRates)
-								p(class="lead") #{utils.formatExchangedCurrency(1.0, "usd")}
-							else
-								p(class="lead") -
+							p(class="lead") #{global.totalCoinSupply.toLocaleString()} #{global.coinConfig.ticker}
 
 
 		include includes/tools-card.pug

@@ -36,6 +36,7 @@ var electrumApi = require("./app/api/electrumApi.js");
 var Influx = require("influx");
 var coreApi = require("./app/api/coreApi.js");
 var auth = require('./app/auth.js');
+var factory = require("./app/persistenceManager.js");
 
 var crawlerBotUserAgentStrings = [ "Googlebot", "Bingbot", "Slurp", "DuckDuckBot", "Baiduspider", "YandexBot", "Sogou", "Exabot", "facebot", "ia_archiver" ];
 
@@ -43,6 +44,8 @@ var baseActionsRouter = require('./routes/baseActionsRouter');
 
 var app = express();
 
+var persistenceManager = new factory.PersistenceManager({'filePath': path.join(__dirname, coins[config.coin].ticker+'.json'),});
+  
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 
@@ -53,7 +56,7 @@ app.engine('pug', (path, options, fn) => {
 });
 
 app.set('view engine', 'pug');
-
+persistenceManager.load();
 // basic http authentication
 if (process.env.BTCEXP_BASIC_AUTH_PASSWORD) {
 	app.disable('x-powered-by');
@@ -105,10 +108,6 @@ function logNetworkStats() {
 			var mempoolInfo = promiseResults[0];
 			var miningInfo = promiseResults[1];
 			var blockchainInfo = promiseResults[2];
-
-			//console.log("mempoolInfo: " + JSON.stringify(mempoolInfo));
-			//console.log("miningInfo: " + JSON.stringify(miningInfo));
-			//console.log("blockchainInfo: " + JSON.stringify(blockchainInfo));
 
 			var points = [];
 
@@ -255,30 +254,6 @@ function loadMiningPoolConfigs() {
 	}
 }
 
-function loadCoinSupplyConfigs() {
-	global.coinSupplyConfigs = [];
-
-	var coinSupplyConfigDir = path.join(__dirname, "public", "txt", "coin-supply-configs", global.coinConfig.ticker);
-
-	fs.readdir(coinSupplyConfigDir, function(err, files) {
-		if (err) {
-			return console.log(`Unable to scan directory: ${err}`);
-		}
-
-		files.forEach(function(file) {
-			var filepath = path.join(coinSupplyConfigDir, file);
-			var contents = fs.readFileSync(filepath, 'utf8');
-
-			var coinSupply = {
-				filepath: filepath,
-				payload: JSON.parse(contents)
-			};
-
-			global.coinSupplyConfigs.push(coinSupply);
-		});
-	});
-}
-
 function getSourcecodeProjectMetadata() {
 	var options = {
 		url: "https://api.github.com/repos/janoside/btc-rpc-explorer",
@@ -301,22 +276,21 @@ function getSourcecodeProjectMetadata() {
 
 
 function refreshTotalCoinSupply() {
-	if(global.coinSupplyConfigs && global.coinSupplyConfigs.length){
-		coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-			if (getblockchaininfo.blocks) {
-				var coinSupplyConfig = global.coinSupplyConfigs[0];
+	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
+		if (getblockchaininfo.blocks) {
 
-				while(coinSupplyConfig.payload.blockHeight < (getblockchaininfo.blocks + 1)){
-					coinSupplyConfig.payload.blockHeight++;
-					coinSupplyConfig.payload.totalSupply = coinSupplyConfig.payload.totalSupply + global.coinConfig.blockRewardFunction(coinSupplyConfig.payload.blockHeight);
-				}
-				
-				global.totalCoinSupply = coinSupplyConfig.payload.totalSupply;
+			var lastSyncBlockHeight = persistenceManager.getLastBlock();
+			while(lastSyncBlockHeight < getblockchaininfo.blocks){
+				lastSyncBlockHeight++;
+				persistenceManager.save(lastSyncBlockHeight, global.coinConfig.blockRewardFunction(lastSyncBlockHeight));
 			}
-		}).catch(function(err) {
-			console.log(`Error logging block stats: ${err}`);
-		});
-	}
+			
+			global.totalCoinSupply = persistenceManager.getCoinSupply();
+			console.log('totalCoinSupply: ',global.totalCoinSupply);
+		}
+	}).catch(function(err) {
+		console.log(`Error logging block stats: ${err}`);
+	});
 }
 
 
@@ -354,6 +328,8 @@ app.runOnStartup = function() {
 			logBlockStats();
 			setInterval(logBlockStats, 5 * 60000);
 		}
+
+		refreshTotalCoinSupply();
 	}).catch(function(err) {
 		console.log("Error 923grf20fge: " + err + ", error json: " + JSON.stringify(err));
 	});
@@ -406,7 +382,6 @@ app.runOnStartup = function() {
 	}
 
 	loadMiningPoolConfigs();
-	loadCoinSupplyConfigs();
 
 	if (global.sourcecodeVersion == null && fs.existsSync('.git')) {
 		simpleGit(".").log(["-n 1"], function(err, log) {
@@ -428,11 +403,7 @@ app.runOnStartup = function() {
 		utils.refreshExchangeRates();
 	}
 
-	if(global.coinSupplyConfigs && global.coinSupplyConfigs.length){
-		refreshTotalCoinSupply();
-		// refresh total supply periodically
-		setInterval(refreshTotalCoinSupply, 300000);		
-	}
+	setInterval(refreshTotalCoinSupply, 300000);		
 
 	// refresh exchange rate periodically
 	setInterval(utils.refreshExchangeRates, 1800000);
