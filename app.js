@@ -45,7 +45,7 @@ var baseActionsRouter = require('./routes/baseActionsRouter');
 var app = express();
 
 var persistenceManager = new factory.PersistenceManager({'filePath': path.join(__dirname, coins[config.coin].ticker+'.json'),});
-  
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 
@@ -256,7 +256,7 @@ function loadMiningPoolConfigs() {
 
 function getSourcecodeProjectMetadata() {
 	var options = {
-		url: "https://api.github.com/repos/janoside/btc-rpc-explorer",
+		url: "https://api.github.com/repos/Betchip/btc-rpc-explorer",
 		headers: {
 			'User-Agent': 'request'
 		}
@@ -591,7 +591,5 @@ app.use(function(err, req, res, next) {
 app.locals.moment = moment;
 app.locals.Decimal = Decimal;
 app.locals.utils = utils;
-
-
 
 module.exports = app;

@@ -14,6 +14,7 @@ var utils = require('./../app/utils.js');
 var coins = require("./../app/coins.js");
 var config = require("./../app/config.js");
 var coreApi = require("./../app/api/coreApi.js");
+var connection = require('./../app/database');
 
 const forceCsrf = csurf({ ignoreMethods: [] });
 
@@ -639,6 +640,7 @@ router.get("/address/:address", function(req, res, next) {
 			res.locals.electrumScripthash = addrScripthash;
 
 			promises.push(new Promise(function(resolve, reject) {
+				
 				electrumApi.getAddressBalance(addrScripthash).then(function(result) {
 					res.locals.balance = result;
 
@@ -773,6 +775,79 @@ router.get("/address/:address", function(req, res, next) {
 					reject(err);
 				});
 			}));
+		}else{
+			res.locals.msFunctionality = true;
+			promises.push(new Promise(function(resolve, reject) {
+				var sql = 'SELECT * FROM addresses WHERE id = ?';
+				connection.query(sql, [address], function (err, result, fields) {
+					if (err){
+						reject(err);
+					}else{
+						if(result.length > 0){
+							console.log('Balance:'+result[0].balance);
+							res.locals.balance = {
+								result: {
+									confirmed: (result[0].balance * coinConfig.baseCurrencyUnit.multiplier)
+								}
+							};
+						}
+						resolve();
+					}
+				});
+			}));
+			
+			promises.push(new Promise(function(resolve, reject) {
+				var sql = "";
+				if (sort == "desc") {
+					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time  FROM transactions WHERE address_id = ? order by date_added desc LIMIT ?";
+				}else{
+					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time FROM transactions WHERE address_id = ? order by date_added asc LIMIT ?";
+				}
+				connection.query(sql, [address, limit], function (err, result) {
+					if (err){
+						reject(err);
+					}else{
+						var txids = [];
+						var blockHeightsByTxid = {};
+						var addrGainsByTx = {};
+						var addrLossesByTx = {};
+						var txInputsByTransaction = {};
+						
+						if(result.length > 0){
+							for (var i = 0; i < result.length; i++) {
+								txids.push(result[i].txid);
+
+								if(result[i].type == 'O'){
+									if (addrLossesByTx[result[i].txid] == null) {
+											addrLossesByTx[result[i].txid] = new Decimal(0);
+									}
+
+									addrLossesByTx[result[i].txid] = addrLossesByTx[result[i].txid].plus(new Decimal(result[i].amount));
+								}else{
+									if (addrGainsByTx[result[i].txid] == null) {
+										addrGainsByTx[result[i].txid] = new Decimal(0);
+									}
+									
+									if (txInputsByTransaction[result[i].txid] == null) {
+										txInputsByTransaction[result[i].txid] = [];
+									}
+
+									addrGainsByTx[result[i].txid] = addrGainsByTx[result[i].txid].plus(new Decimal(result[i].amount));
+									txInputsByTransaction[result[i].txid].push(result[i]);
+								}
+							}
+						}
+						
+						res.locals.txids = txids;
+						res.locals.transactions = result;
+						res.locals.addrGainsByTx = addrGainsByTx;
+						res.locals.addrLossesByTx = addrLossesByTx;
+						res.locals.txInputsByTransaction = txInputsByTransaction;
+						res.locals.blockHeightsByTxid = blockHeightsByTxid;
+						resolve();
+					}
+				});
+			}));			
 		}
 
 		promises.push(new Promise(function(resolve, reject) {

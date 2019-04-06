@@ -56,7 +56,7 @@ module.exports = {
 	noInmemoryRpcCache: (process.env.BTCEXP_NO_INMEMORY_RPC_CACHE.toLowerCase() == "true"),
 	
 	rpcConcurrency: (process.env.BTCEXP_RPC_CONCURRENCY || 10),
-
+	
 	rpcBlacklist:
 	  process.env.BTCEXP_RPC_ALLOWALL  ? []
 	: process.env.BTCEXP_RPC_BLACKLIST ? process.env.BTCEXP_RPC_BLACKLIST.split(',').filter(Boolean)
@@ -181,5 +181,10 @@ module.exports = {
 			storeId:"DUUExHMvKNAFukrJZHCShMhwZvfPq87QnkUhvE6h5kh2",
 			notifyEmail:"chaintools.io@gmail.com"
 		}
-	}
+	},
+	//MySQL CONNECTION
+	dbHost: (process.env.DB_HOST || 'localhost'),
+	dbUser: (process.env.DB_USER || 'user'),
+	dbPassword: (process.env.DB_PASSWORD || 'password'),
+	dbName: (process.env.DB_NAME || 'dbname'),
 };

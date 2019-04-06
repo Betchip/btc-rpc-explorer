@@ -7,6 +7,10 @@
         "/Mining-Dutch/": {
             "name": "Mining-Dutch",
             "link": "https://www.mining-dutch.nl/"
+        },
+        "yiimp": {
+            "name": "yiimp",
+            "link": "http://http://yiimp.eu/"
         }
     },
     "payout_addresses": {
@@ -17,6 +21,10 @@
         "BRvXJgMLWZHPRqekj9WmoEoudQZTZV36Gx": {
             "name": "Mining-Dutch",
             "link": "https://www.mining-dutch.nl/"
+        },
+        "3DkZ72N7R5ZtSziTvDqCELJmuax73LJUme": {
+            "name": "yiimp",
+            "link": "http://http://yiimp.eu/"
         }
     }
 }

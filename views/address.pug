@@ -338,6 +338,55 @@ block content
 												- var txIOHighlightAddress = address;
 
 												include includes/transaction-io-details.pug
+							else if(msFunctionality)
+								if (transactions.length == 0)
+									span No transactions found
+
+								each tx, txIndex in transactions
+									//pre
+									//	code(class="json bg-light") #{JSON.stringify(tx, null, 4)}
+									div(class=("xcard bg-light rounded shadow-sm " + ((txIndex < (transactions.length - 1) || txids.length > limit) ? "mb-4" : "")))
+										div(class="card-header monospace clearfix")
+											div(class="float-left", style="margin-right: 0px;")
+												if (sort == "desc")
+													span ##{(txids.length - offset - txIndex).toLocaleString()}
+												else
+													span ##{(offset + txIndex + 1).toLocaleString()}
+												span  &ndash;
+
+											div(class="row")
+												div(class="col-md-6")
+													if (tx && tx.txid)
+														a(href=("/tx/" + tx.txid)) #{tx.txid}
+
+														if (global.specialTransactions && global.specialTransactions[tx.txid])
+															span  
+															a(data-toggle="tooltip", title=(coinConfig.name + " Fun! See transaction for details"))
+																i(class="fas fa-certificate text-primary")
+
+												div(class="col-md-6")
+													div(class="text-md-right")
+														if (tx.time)
+															span #{moment.utc(new Date(tx["time"] * 1000)).format("Y-MM-DD HH:mm:ss")} utc
+															- var timeAgoTime = tx.time;
+															include includes/time-ago.pug
+
+														else
+															span(class="text-danger") Unconfirmed
+
+												div(class="col")
+													if (addrGainsByTx[tx.txid])
+														- var currencyValue = addrGainsByTx[tx.txid];
+														span(class="text-success") +
+															include includes/value-display.pug
+
+														if (addrLossesByTx[tx.txid])
+															span  / 
+
+													if (addrLossesByTx[tx.txid])
+														- var currencyValue = addrLossesByTx[tx.txid];
+														span(class="text-danger") -
+															include includes/value-display.pug
 
 							else
 								p Since this explorer is database-free, it doesn't natively support address transaction history. However, you can configure it to communicate with one or more ElectrumX servers to build and display this data. In doing so, you should be aware that you'll be trusting those ElectrumX servers. If you configure multiple servers the results obtained from each will be cross-referenced against the others. Communicating with ElectrumX servers will also impact your privacy since the servers will know what addresses you're interested in. If these tradeoffs are acceptable, you can see a list of public ElectrumX servers here: 
