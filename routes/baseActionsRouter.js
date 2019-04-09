@@ -573,7 +573,6 @@ router.get("/address/:address", function(req, res, next) {
 	var offset = 0;
 	var sort = "desc";
 
-	
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit);
 
@@ -795,15 +794,36 @@ router.get("/address/:address", function(req, res, next) {
 					}
 				});
 			}));
+
+			promises.push(new Promise(function(resolve, reject) {
+				var sql = "SELECT COUNT(1) AS headCount  FROM transactions WHERE address_id = ?";
+				connection.query(sql, [address], function (err, result) {
+					if (err){
+						reject(err);
+					}else{
+						var txids = [];
+						
+						if(result.length > 0){
+							var totalItems = result[0].headCount;
+							for (var i = 0; i < totalItems; i++) {
+								txids.push(i);//Layout/Views already expecting this
+							}
+						}
+						
+						res.locals.txids = txids;
+						resolve();
+					}
+				});
+			}));
 			
 			promises.push(new Promise(function(resolve, reject) {
 				var sql = "";
 				if (sort == "desc") {
-					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time  FROM transactions WHERE address_id = ? order by date_added desc LIMIT ?";
+					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time  FROM transactions WHERE address_id = ? order by date_added desc LIMIT ? OFFSET ?";
 				}else{
-					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time FROM transactions WHERE address_id = ? order by date_added asc LIMIT ?";
+					sql="SELECT address_id, txid, type, amount, unix_timestamp(date_added) as time FROM transactions WHERE address_id = ? order by date_added asc LIMIT ? OFFSET ?";
 				}
-				connection.query(sql, [address, limit], function (err, result) {
+				connection.query(sql, [address, limit, offset], function (err, result) {
 					if (err){
 						reject(err);
 					}else{
@@ -838,7 +858,7 @@ router.get("/address/:address", function(req, res, next) {
 							}
 						}
 						
-						res.locals.txids = txids;
+						//res.locals.txids = txids;
 						res.locals.transactions = result;
 						res.locals.addrGainsByTx = addrGainsByTx;
 						res.locals.addrLossesByTx = addrLossesByTx;

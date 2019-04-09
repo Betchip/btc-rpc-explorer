@@ -184,7 +184,7 @@ module.exports = {
 	},
 	//MySQL CONNECTION
 	dbHost: (process.env.DB_HOST || 'localhost'),
-	dbUser: (process.env.DB_USER || 'user'),
+	dbUser: (process.env.DB_USERNAME || 'user'),
 	dbPassword: (process.env.DB_PASSWORD || 'password'),
-	dbName: (process.env.DB_NAME || 'dbname'),
+	dbName: (process.env.DB_DATABASE || 'dbname'),
 };

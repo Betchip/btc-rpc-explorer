@@ -64,12 +64,7 @@ if(isset($blockchaininfo['blocks'])){
 	exit('Could not connect to RPC Node.');
 }
 
-//17220
-//$begin_block = 17119;
-//$end_block = 17119;
-
 $block_hash = $bitcoin->getblockhash($begin_block);
-
 $block_index = $begin_block;
 $addrMap = array();
 
@@ -85,12 +80,6 @@ while ($block_index < ($end_block+1)){
 		
 		$address = $addrMap[$scriptPubKey];
 		$address->appendTransaction($addr);
-		
-		/*if($scriptPubKey == 'BSi2iwZbgi9h3pqsth7qPUKTyM62Uwva7s'){
-			//var_dump($address);
-			echo "-------------------------------------------\n";
-			echo "$scriptPubKey, received: ".$address->getReceived().", sent: ".$address->getSent().", balance: ".$address->getBalance()."\n";
-		}*/
 	}
 	
 	// BEGIN

@@ -3,7 +3,7 @@ var config = require('./config'); //import config file for DB information
 var util = require('util');
 //create pool connection of MySQL
 var pool = mysql.createPool({
-    connectionLimit: 100,
+    connectionLimit: 10,
     host: config.dbHost,
     user: config.dbUser,
     password: config.dbPassword,
